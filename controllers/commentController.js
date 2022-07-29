@@ -13,6 +13,7 @@ exports.comments_get = (req, res, next) => {
 };
 
 exports.comments_post = [
+  // Sanitize and validate
   body("name", "name cannot be empty")
     .exists()
     .trim()
@@ -25,6 +26,11 @@ exports.comments_post = [
     .escape(),
 
   (req, res, next) => {
+    // Check if validation result passes
+    const errors = validationResult(req.body);
+    if (!errors.isEmpty) {
+      return res.json(err);
+    }
     const comment = new Comment({
       content: req.body.content,
     });
@@ -48,10 +54,30 @@ exports.comment_get_id = (req, res, next) => {
   });
 };
 
-exports.comment_put_id = (req, res, next) => {
-  res.json({ message: "comment updated!" });
-};
+exports.comment_put_id = [
+  body("comment-content", "Comment edit is not valid")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  (req, res, next) => {
+    const errors = validationResult(req.body);
+    if (!errors.isEmpty()) {
+      return res.json(err);
+    }
+
+    // Comment.findByIdAndUpdate
+    res.json({ message: "comment updated!" });
+  },
+];
 
 exports.comment_delete_id = (req, res, next) => {
-  res.json({ message: "comment deleted!" });
+  const id = req.params.comment_id;
+  Comment.findByIdAndDelete(id, (err, docs) => {
+    if (err) {
+      return res.json({ err });
+    }
+    console.log(`Deleted: ${docs}`);
+    res.json({ message: "comment deleted!" });
+  });
 };

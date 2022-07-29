@@ -17,7 +17,7 @@ mongoose
   });
 
 const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
+const authRouter = require("./routes/auth");
 const postsRouter = require("./routes/posts");
 const commentsRouter = require("./routes/comments");
 
@@ -35,7 +35,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
-app.use("/api/users", usersRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/posts", postsRouter);
 app.use("/api/posts/:id/comments", commentsRouter);
 
