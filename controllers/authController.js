@@ -167,3 +167,16 @@ exports.login_post = async (req, res, next) => {
     message: "Successfully Logged In!",
   });
 };
+
+exports.users_get = async (req, res) => {
+  const users = await User.find();
+  if (!users) return res.json({ error: "Users not found!" });
+  return res.json({ users });
+};
+
+exports.user_get = async (req, res) => {
+  const userId = req.params.userid;
+  const user = await User.findOne({ _id: userId });
+  if (!user) return res.json({ error: "User not found" });
+  return res.json({ user });
+};
