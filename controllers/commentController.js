@@ -1,7 +1,7 @@
 const Comment = require("../models/comment");
 const { body, validationResult } = require("express-validator");
 
-exports.comments_get = (req, res, next) => {
+exports.comments_get = async (req, res, next) => {
   Comment.find()
     .sort({ timestamp: -1 })
     .exec((err, comments) => {

@@ -1,7 +1,7 @@
 const Post = require("../models/post");
 
 // Get all posts
-exports.posts_get = (req, res, next) => {
+exports.posts_get = (req, res) => {
   Post.find()
     .sort({ timestamp: "descending" })
     .exec((err, data) => {

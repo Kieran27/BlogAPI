@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const post_controller = require("../controllers/postController");
+const authToken = require("../middleware/authToken");
 
 /* GET home page. */
-router.get("/", post_controller.posts_get);
+router.get("/", authToken, post_controller.posts_get);
 
 router.post("/", post_controller.posts_post);
 

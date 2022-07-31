@@ -2,6 +2,7 @@ const User = require("../models/user");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
+const authToken = require("../middleware/authToken");
 
 require("dotenv").config();
 
@@ -118,18 +119,27 @@ exports.sign_up_post_new = [
       username,
       email,
       password: hashedPassword,
-    });
-
-    user.save((err) => {
-      if (err) return res.status(400).json({ error: err });
+      refreshTokens: [],
     });
 
     const accessToken = await JWT.sign({ username }, process.env.SECRET, {
       expiresIn: "36s",
     });
 
+    const refreshToken = await JWT.sign({ username }, process.env.SECRET, {
+      expiresIn: "15m",
+    });
+
+    // Push refresh token into user array and save to database
+    user.refreshTokens.push(refreshToken);
+
+    user.save((err) => {
+      if (err) return res.status(400).json({ error: err });
+    });
+
     res.json({
       accessToken,
+      refreshToken,
     });
   },
 ];
@@ -145,6 +155,7 @@ exports.login_post = async (req, res, next) => {
     });
   }
 
+  // Compares hashed password to input password
   const passwordMatch = await bcrypt.compare(password, user[0].password);
 
   if (!passwordMatch) {
@@ -162,8 +173,20 @@ exports.login_post = async (req, res, next) => {
     }
   );
 
+  // Send Refresh Token to Client
+  const refreshToken = await JWT.sign(
+    { username: user[0].username },
+    process.env.SECRET,
+    {
+      expiresIn: "15m",
+    }
+  );
+
+  // Push refresh token into user token array
+
   res.json({
-    token: accessToken,
+    accessToken: accessToken,
+    refreshToken: refreshToken,
     message: "Successfully Logged In!",
   });
 };
@@ -179,4 +202,40 @@ exports.user_get = async (req, res) => {
   const user = await User.findOne({ _id: userId });
   if (!user) return res.json({ error: "User not found" });
   return res.json({ user });
+};
+
+exports.refresh_token_post = async (req, res) => {
+  // Get refresh token
+  const refreshToken = req.header("x-auth-token");
+  // send error if there is no token
+  if (!refreshToken) {
+    return res.status(401).json({ msg: "Error token not supplied" });
+  }
+  // If token exists
+  try {
+    const user = JWT.verify(refreshToken, process.env.SECRET);
+    const accessToken = await JWT.sign(user.username, process.env.SECRET, {
+      expiresIn: "36s",
+    });
+    return res.json({ accessToken });
+  } catch (error) {
+    res.status(403).json({
+      msg: "Invalid Token",
+    });
+  }
+};
+
+exports.logout_post = async (req, res) => {
+  // Get refreshToken
+  const refreshToken = req.header("x-auth-token");
+  // Search database where username = username model
+  const user = await User.findOneAndUpdate(
+    { refreshTokens: refreshToken },
+    { $pull: { refreshTokens: { $in: [refreshToken] } } }
+  );
+
+  // Send status back to user notifying them of being logged out
+  return res.json({
+    msg: "Logged out successfully!",
+  });
 };
