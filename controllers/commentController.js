@@ -2,14 +2,15 @@ const Comment = require("../models/comment");
 const { body, validationResult } = require("express-validator");
 
 exports.comments_get = async (req, res, next) => {
+  console.log(req.params);
   Comment.find()
     .sort({ timestamp: -1 })
     .exec((err, comments) => {
       if (err) {
         return res.json({ error: err });
       }
+      res.json({ comments });
     });
-  res.json({ message: "Got all the comments!" });
 };
 
 exports.comments_post = [
@@ -20,28 +21,25 @@ exports.comments_post = [
     .isLength({ min: 1, max: 50 })
     .escape(),
 
-  body("comment-content", "comment not valid")
-    .trim()
-    .isLength({ min: 1 })
-    .escape(),
+  body("content", "comment not valid").trim().isLength({ min: 1 }).escape(),
 
-  (req, res, next) => {
+  async (req, res, next) => {
+    console.log(req.params);
     // Check if validation result passes
     const errors = validationResult(req.body);
     if (!errors.isEmpty) {
       return res.json(err);
     }
-    const comment = new Comment({
-      content: req.body.content,
-    });
-
-    comment.save((err) => {
-      if (err) {
-        return res.status(404);
-      }
-      console.log("Saved to database!");
-    });
-    res.json({ message: "Comment Posted!" });
+    try {
+      Comment.create({
+        author: req.body.name,
+        content: req.body.content,
+        postId: req.params.post_id,
+      });
+      return res.send("Yay!");
+    } catch (error) {
+      return res.status(404).json({ error });
+    }
   },
 ];
 
@@ -80,4 +78,20 @@ exports.comment_delete_id = (req, res, next) => {
     console.log(`Deleted: ${docs}`);
     res.json({ message: "comment deleted!" });
   });
+};
+
+exports.comments_create = (req, res) => {
+  Comment.create({
+    content: "hello world",
+    timestamp: Date.now(),
+  });
+  Comment.create({
+    content: "Test Comment",
+    timestamp: Date.now(),
+  });
+  Comment.create({
+    content: "Testing for populate method",
+    timestamp: Date.now(),
+  });
+  res.send("Done!");
 };

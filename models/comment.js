@@ -8,7 +8,7 @@ const CommentSchema = new Schema({
   content: { type: String, minLength: 1, maxLength: 200, required: true },
   likes: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now() },
-  belongsTo: { type: String },
+  postId: { type: String },
 });
 
 CommentSchema.virtual("url").get(function () {

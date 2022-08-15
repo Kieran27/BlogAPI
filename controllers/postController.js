@@ -1,9 +1,13 @@
 const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 // Get all posts
 exports.posts_get = (req, res) => {
   Post.find()
     .sort({ timestamp: "descending" })
+    .populate({
+      path: "comments",
+    })
     .exec((err, data) => {
       if (err) {
         res.status(404);
@@ -14,29 +18,30 @@ exports.posts_get = (req, res) => {
 };
 
 // Create new post
-exports.posts_post = (req, res, next) => {
-  const post = new Post({
-    title: req.body.posttitle,
-    content: req.body.postbody,
-  });
-
-  post.save((err) => {
-    if (err) {
-      return res.status(404);
-    }
-    console.log("Saved to database!");
-  });
-  res.json({ message: "Post Submitted!" });
+exports.posts_post = async (req, res, next) => {
+  try {
+    await Post.create({
+      title: "pls work",
+      content: "worldies",
+      comments: await Comment.find(),
+    });
+    res.json({ message: "Post Submitted!" });
+  } catch (err) {
+    res.json({ message: "error" });
+  }
 };
 
 // Get individual post
-exports.post_get_id = (req, res, next) => {
-  Post.findById(req.params.id).exec((err, data) => {
-    if (err) {
-      return res.json({ error: err });
-    }
-    return res.json({ post: data });
-  });
+exports.post_get_id = (req, res) => {
+  console.log(req.params);
+  Post.findById(req.params.post_id)
+    .populate("comments", "postId")
+    .exec((err, data) => {
+      if (err) {
+        return res.json({ error: err });
+      }
+      return res.json({ post: data });
+    });
 };
 
 // Updated existing individual post
