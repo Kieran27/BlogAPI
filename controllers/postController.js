@@ -6,12 +6,7 @@ const { body, validationResult } = require("express-validator");
 exports.posts_get = (req, res) => {
   Post.find()
     .sort({ timestamp: "descending" })
-    .populate({
-      path: "comments",
-      match: {
-        likes: { $gte: 1 },
-      },
-    })
+    .populate("comments")
     .exec((err, data) => {
       if (err) {
         res.status(404);
@@ -38,7 +33,6 @@ exports.posts_post = [
       await Post.create({
         title: title,
         content: content,
-        comments: await Comment.find(),
       });
       res.json({ message: "Post Submitted!" });
     } catch (err) {

@@ -12,8 +12,8 @@ router.post("/", comment_controller.comments_post);
 
 router.get("/:comment_id", comment_controller.comment_get_id);
 
-router.put("/:comment_id", authToken, comment_controller.comment_put_id);
+router.put("/:comment_id", comment_controller.comment_put_id);
 
-router.delete("/:comment_id", authToken, comment_controller.comment_delete_id);
+router.delete("/:comment_id", comment_controller.comment_delete_id);
 
 module.exports = router;

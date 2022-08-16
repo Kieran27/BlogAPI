@@ -1,5 +1,7 @@
 const Comment = require("../models/comment");
+const Post = require("../models/post");
 const { body, validationResult } = require("express-validator");
+const { findByIdAndUpdate, findById } = require("../models/post");
 
 exports.comments_get = async (req, res, next) => {
   console.log(req.params);
@@ -31,12 +33,20 @@ exports.comments_post = [
       return res.json(err);
     }
     try {
-      Comment.create({
+      const newComment = await Comment.create({
         author: req.body.name,
         content: req.body.content,
         postId: req.params.post_id,
       });
-      return res.send("Yay!");
+
+      // Update Post's comments Array
+      const comments = await Comment.find({ postId: req.params.post_id });
+      console.log(comments);
+      const updatedPost = await Post.findByIdAndUpdate(req.params.post_id, {
+        comments: comments,
+      });
+
+      return res.json({ updatedPost });
     } catch (error) {
       return res.status(404).json({ error });
     }
@@ -53,31 +63,39 @@ exports.comment_get_id = (req, res, next) => {
 };
 
 exports.comment_put_id = [
-  body("comment-content", "Comment edit is not valid")
+  // Validate and Sanitize
+  body("commentContent", "Comment edit is not valid")
     .trim()
     .isLength({ min: 1 })
     .escape(),
 
-  (req, res, next) => {
+  async (req, res) => {
+    // Check Validation Result
     const errors = validationResult(req.body);
     if (!errors.isEmpty()) {
       return res.json(err);
     }
 
-    // Comment.findByIdAndUpdate
-    res.json({ message: "comment updated!" });
+    const commentId = req.params.comment_id;
+
+    try {
+      commentUpdateResult = await Comment.findByIdAndUpdate(commentId, {
+        content: req.body.commentContent,
+      });
+    } catch (error) {
+      res.json({ error });
+    }
   },
 ];
 
-exports.comment_delete_id = (req, res, next) => {
+exports.comment_delete_id = async (req, res) => {
   const id = req.params.comment_id;
-  Comment.findByIdAndDelete(id, (err, docs) => {
-    if (err) {
-      return res.json({ err });
-    }
-    console.log(`Deleted: ${docs}`);
-    res.json({ message: "comment deleted!" });
-  });
+  try {
+    deletedResult = await Comment.findByIdAndDelete(id);
+    return res.json({ deletedResult });
+  } catch (error) {
+    res.json({ error });
+  }
 };
 
 exports.comments_create = (req, res) => {
