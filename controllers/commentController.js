@@ -4,7 +4,6 @@ const { body, validationResult } = require("express-validator");
 const { findByIdAndUpdate, findById } = require("../models/post");
 
 exports.comments_get = async (req, res, next) => {
-  console.log(req.params);
   Comment.find()
     .sort({ timestamp: -1 })
     .exec((err, comments) => {

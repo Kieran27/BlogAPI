@@ -45,7 +45,7 @@ exports.posts_post = [
 exports.post_get_id = (req, res) => {
   console.log(req.params);
   Post.findById(req.params.post_id)
-    .populate("comments", "postId")
+    .populate("comments")
     .exec((err, data) => {
       if (err) {
         return res.json({ error: err });

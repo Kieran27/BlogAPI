@@ -98,7 +98,7 @@ exports.sign_up_post_new = [
     // Get validation Result
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({ errors: errors.array() });
+      return res.status(409).json({ error: errors.array() });
     }
 
     // check if username or email exists
@@ -123,11 +123,11 @@ exports.sign_up_post_new = [
     });
 
     const accessToken = await JWT.sign({ username }, process.env.SECRET, {
-      expiresIn: "36s",
+      expiresIn: "30m",
     });
 
     const refreshToken = await JWT.sign({ username }, process.env.SECRET, {
-      expiresIn: "15m",
+      expiresIn: "45m",
     });
 
     // Push refresh token into user array and save to database
@@ -149,8 +149,8 @@ exports.login_post = async (req, res, next) => {
 
   // Search database for user email
   const user = await User.find({ email: email });
-  if (!user) {
-    return res.json({
+  if (user.length === 0) {
+    return res.status(401).json({
       error: "User does not exist!",
     });
   }
@@ -159,7 +159,7 @@ exports.login_post = async (req, res, next) => {
   const passwordMatch = await bcrypt.compare(password, user[0].password);
 
   if (!passwordMatch) {
-    return res.json({
+    return res.status(401).json({
       error: "Email or password does not match!",
     });
   }
@@ -169,7 +169,7 @@ exports.login_post = async (req, res, next) => {
     { username: user[0].username },
     process.env.SECRET,
     {
-      expiresIn: "36s",
+      expiresIn: "30m",
     }
   );
 
@@ -178,7 +178,7 @@ exports.login_post = async (req, res, next) => {
     { username: user[0].username },
     process.env.SECRET,
     {
-      expiresIn: "15m",
+      expiresIn: "45m",
     }
   );
 
