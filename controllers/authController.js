@@ -83,12 +83,15 @@ exports.sign_up_post_new = [
   // Validate and sanitize inputs
   body("email", "email must be valid").isEmail().trim(),
   body("username", "Username not valid").isLength({ min: 5 }).trim(),
-  body("password", "Password not valid").isLength({ min: 8 }),
+  body(
+    "password",
+    "Password not valid - must be at Least 8 characters long"
+  ).isLength({ min: 8 }),
   body("passwordconfirm", "passwords do not match")
     .exists()
     .custom(async (value, { req }) => {
       if (value !== req.body.password) {
-        throw new Error("Passwords must be same");
+        throw new Error("Passwords must be the same");
       }
     }),
 
@@ -160,7 +163,7 @@ exports.login_post = async (req, res, next) => {
 
   if (!passwordMatch) {
     return res.status(401).json({
-      error: "Email or password does not match!",
+      error: "Password does not match!",
     });
   }
 
