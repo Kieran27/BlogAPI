@@ -55,4 +55,8 @@ app.use((err, req, res, next) => {
   res.json({ error: err.message });
 });
 
+app.listen(5000, () => {
+  console.log("App running on port 5000");
+});
+
 module.exports = app;

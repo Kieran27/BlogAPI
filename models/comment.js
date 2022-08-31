@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const CommentSchema = new Schema({
   author: { type: String, default: "anon", required: true },
-  content: { type: String, minLength: 1, maxLength: 200, required: true },
+  content: { type: String, minLength: 1, maxLength: 500, required: true },
   likes: { type: Number, default: 0 },
   timestamp: { type: Date, default: Date.now() },
   postId: { type: String },

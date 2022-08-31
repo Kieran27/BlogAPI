@@ -20,23 +20,25 @@ exports.posts_get = (req, res) => {
 exports.posts_post = [
   // Sanitize and validate
   body("title", "title cannot be empty").exists().trim().escape(),
-  body("content", "content not valid").exists().trim().escape(),
+  body("content", "content not valid").exists().trim(),
 
   async (req, res, next) => {
     // Check if validation result passes
     const errors = validationResult(req.body);
     if (!errors.isEmpty) {
-      return res.json(err);
+      return res.json(errors);
     }
-    const { title, content } = req.body;
+
+    const { title, content, author } = req.body;
     try {
       await Post.create({
         title: title,
         content: content,
+        author: author,
       });
       res.json({ message: "Post Submitted!" });
-    } catch (err) {
-      res.json({ message: "error" });
+    } catch (error) {
+      res.status(409).json({ message: error });
     }
   },
 ];
@@ -97,6 +99,10 @@ exports.post_delete_id = async (req, res) => {
   const postId = req.params.post_id;
   try {
     await Post.findByIdAndDelete(postId);
+
+    // Find and delete all comments with corresponding postId
+    const deleteComments = await Comment.deleteMany({ postId: postId });
+
     res.json({ message: "Post Deleted!" });
   } catch (error) {
     res.json({ error });

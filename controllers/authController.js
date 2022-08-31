@@ -169,7 +169,7 @@ exports.login_post = async (req, res, next) => {
 
   // Send Access Token to Client
   const accessToken = await JWT.sign(
-    { username: user[0].username },
+    { username: user[0].username, id: user[0]._id },
     process.env.SECRET,
     {
       expiresIn: "30m",
@@ -178,7 +178,7 @@ exports.login_post = async (req, res, next) => {
 
   // Send Refresh Token to Client
   const refreshToken = await JWT.sign(
-    { username: user[0].username },
+    { username: user[0].username, id: user[0]._id },
     process.env.SECRET,
     {
       expiresIn: "45m",

@@ -47,7 +47,7 @@ exports.comments_post = [
 
       return res.json({ updatedPost });
     } catch (error) {
-      return res.status(404).json({ error });
+      return res.status(409).json({ error });
     }
   },
 ];
@@ -111,4 +111,13 @@ exports.comments_create = (req, res) => {
     timestamp: Date.now(),
   });
   res.send("Done!");
+};
+
+exports.user_comments_get = async (req, res) => {
+  const userId = req.params.user_id;
+  try {
+    Comment.find(userId);
+  } catch (error) {
+    res.json({ error });
+  }
 };
