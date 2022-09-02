@@ -14,4 +14,8 @@ router.put("/:post_id", post_controller.post_put_id);
 
 router.delete("/:post_id", post_controller.post_delete_id);
 
+router.post("/:post_id/star", post_controller.post_star_post);
+
+router.post("/:post_id/star-remove", post_controller.post_star_post);
+
 module.exports = router;

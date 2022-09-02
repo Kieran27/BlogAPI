@@ -11,6 +11,7 @@ const PostSchema = new Schema({
   published: { type: Boolean, default: false },
   comments: [{ type: Schema.Types.ObjectId, ref: "comments", required: true }],
   stars: { type: Number, default: 0 },
+  starIds: { type: Array },
   timestamp: { type: Date, default: Date.now() },
 });
 

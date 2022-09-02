@@ -108,3 +108,64 @@ exports.post_delete_id = async (req, res) => {
     res.json({ error });
   }
 };
+
+// Handle Starring Post
+exports.post_star_post = async (req, res) => {
+  const { userId } = req.body;
+  const postId = req.params.post_id;
+  console.log(postId);
+  try {
+    // Add userid to starids array from post model
+    const staridsPosts = await Post.find({ _id: postId });
+    const starids = staridsPosts[0].starIds;
+    console.log(starids);
+
+    // Push userId to array and update document's array
+    const updatedArray = [...starids, userId];
+    console.log(updatedArray);
+    const updatedStarIds = await Post.findByIdAndUpdate(postId, {
+      starIds: updatedArray,
+    });
+
+    // Update and increment post star number by 1
+    const post = await Post.find({ _id: postId });
+    let stars = post[0].stars;
+    let updatedStars = (stars += 1);
+
+    await Post.findByIdAndUpdate(postId, {
+      stars: updatedStars,
+    });
+    return res.json({ message: "Success!" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Handle Un-Starring Post
+exports.post_star_post = async (req, res) => {
+  const { userId } = req.body;
+  const postId = req.params.post_id;
+  try {
+    // Remove userid to starids array from post model
+    const staridsPosts = await Post.find({ _id: postId });
+    const starids = staridsPosts[0].starIds;
+
+    // Remove userId to array and update document's array
+    const updatedArray = starids.filter((item) => item === userId);
+    const updatedStarIds = await Post.findByIdAndUpdate(postId, {
+      starIds: updatedArray,
+    });
+
+    // Update and decrement post star number by 1
+    const post = await Post.find({ _id: postId });
+    let stars = post[0].stars;
+    let updatedStars = (stars -= 1);
+
+    await Post.findByIdAndUpdate(postId, {
+      stars: updatedStars,
+    });
+    return res.json({ message: "Success!" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
