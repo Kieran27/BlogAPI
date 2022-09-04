@@ -36,6 +36,7 @@ exports.comments_post = [
         author: req.body.name,
         content: req.body.content,
         postId: req.params.post_id,
+        timestamp: new Date(),
       });
 
       // Update Post's comments Array

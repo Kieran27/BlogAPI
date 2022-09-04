@@ -35,6 +35,7 @@ exports.posts_post = [
         title: title,
         content: content,
         author: author,
+        timestamp: new Date(),
       });
       res.json({ message: "Post Submitted!" });
     } catch (error) {
