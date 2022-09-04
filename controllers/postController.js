@@ -113,57 +113,50 @@ exports.post_delete_id = async (req, res) => {
 exports.post_star_post = async (req, res) => {
   const { userId } = req.body;
   const postId = req.params.post_id;
-  console.log(postId);
-  try {
-    // Add userid to starids array from post model
-    const staridsPosts = await Post.find({ _id: postId });
-    const starids = staridsPosts[0].starIds;
-    console.log(starids);
 
-    // Push userId to array and update document's array
-    const updatedArray = [...starids, userId];
-    console.log(updatedArray);
-    const updatedStarIds = await Post.findByIdAndUpdate(postId, {
-      starIds: updatedArray,
-    });
-
-    // Update and increment post star number by 1
-    const post = await Post.find({ _id: postId });
-    let stars = post[0].stars;
-    let updatedStars = (stars += 1);
-
-    await Post.findByIdAndUpdate(postId, {
-      stars: updatedStars,
-    });
-    return res.json({ message: "Success!" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  // Check if userId exists
+  if (!userId) {
+    throw new Error("No User Id Provided!");
   }
-};
 
-// Handle Un-Starring Post
-exports.post_star_post = async (req, res) => {
-  const { userId } = req.body;
-  const postId = req.params.post_id;
   try {
-    // Remove userid to starids array from post model
-    const staridsPosts = await Post.find({ _id: postId });
-    const starids = staridsPosts[0].starIds;
-
-    // Remove userId to array and update document's array
-    const updatedArray = starids.filter((item) => item === userId);
-    const updatedStarIds = await Post.findByIdAndUpdate(postId, {
-      starIds: updatedArray,
-    });
-
-    // Update and decrement post star number by 1
+    // Get starIds array and stars integer from document
     const post = await Post.find({ _id: postId });
+    const starIds = post[0].starIds;
     let stars = post[0].stars;
-    let updatedStars = (stars -= 1);
 
-    await Post.findByIdAndUpdate(postId, {
-      stars: updatedStars,
-    });
+    // Check if userId exists within StarIds Array and respond accordingly
+    const checkIfIdExists = starIds.includes(userId);
+    console.log(checkIfIdExists);
+
+    // If userId exists, remove id from array and decrement stars
+    if (checkIfIdExists) {
+      console.log("no");
+      const filteredArray = starIds.filter((id) => id !== userId);
+      console.log(filteredArray);
+      let updatedStars = (stars -= 1);
+
+      // Update document with updated values
+      const updatedPost = await Post.findByIdAndUpdate(postId, {
+        stars: updatedStars,
+        starIds: filteredArray,
+      });
+    }
+
+    // If userId doesn't exist, add id to array and increment stars
+    if (!checkIfIdExists) {
+      console.log("yes");
+      const newArray = [...starIds, userId];
+      let updatedStars = (stars += 1);
+
+      // Update document with updated values
+      const updatedPost = await Post.findByIdAndUpdate(postId, {
+        stars: updatedStars,
+        starIds: newArray,
+      });
+      console.log(updatedPost);
+    }
+
     return res.json({ message: "Success!" });
   } catch (error) {
     res.status(400).json({ error: error.message });

@@ -82,7 +82,7 @@ exports.comment_put_id = [
         content: req.body.commentContent,
       });
     } catch (error) {
-      res.json({ error });
+      res.json({ error: error.message });
     }
   },
 ];
