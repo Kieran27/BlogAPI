@@ -59,10 +59,4 @@ app.use((err, req, res, next) => {
   res.json({ error: err.message });
 });
 
-const port = process.env.PORT || 8000;
-
-app.listen(3000, () => {
-  console.log("Server Running on port " + port);
-});
-
 module.exports = app;
